@@ -47,7 +47,7 @@ def publish(stats):
 
     #boto does not like 0
     #boto 2.0rc1 has a bug with dimensions, currently (06/29/2011) fixed in trunk.
-    #You need version > 2.0.rc1
+    #when version > 2.0.rc1 is released, remove the +1
 
     for metric in ['node_put_fsm_time_mean', 'node_get_fsm_time_mean']:
         c.put_metric_data('riak', metric,
@@ -56,12 +56,13 @@ def publish(stats):
                           dimensions={'Hostname':hostname},
                           unit='Microseconds')
 
-    for metric in ['node_gets_total', 'node_puts_total']:
+    for metric in ['node_gets', 'node_puts']:
+        value = int(metric)/60 #riak spits out 1min stats
         c.put_metric_data('riak', metric,
-                          value=int(stats[metric])+1,
+                          value=value+1,
                           timestamp=tstamp,
                           dimensions={'Hostname':hostname},
-                          unit='Count')
+                          unit='Count/Second')
 
     for metric in ['mem_total', 'mem_allocated']:
         c.put_metric_data('riak', metric,
